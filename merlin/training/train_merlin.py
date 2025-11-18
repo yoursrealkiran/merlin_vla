@@ -5,7 +5,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
 
-from merlin.models.merlin_model import MerlinPolicy
+from merlin.merlin.models.merlin_model import MerlinPolicy
 from merlin.data.toy_reach_dataset import ToyReach2DDataset
 
 def load_config(path: str):
