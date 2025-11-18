@@ -22,11 +22,12 @@ model:
   max_image_tokens: 64       # 8x8 patch grid for 64x64 with patch_size=8
   text_model_name: "t5-small"
   freeze_text_encoder: true
-  action_dim: 3              # Δx, Δy, Δz
+  action_dim: 2              # Δx, Δy
+  max_text_tokens: 64 
 
 train:
   num_epochs: 30
-  lr: 2e-4
+  lr: 0.00002
   weight_decay: 0.01
   warmup_steps: 1000
   max_steps: 30000
