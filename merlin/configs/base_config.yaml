@@ -1,0 +1,37 @@
+experiment_name: "merlin_toy_reach_rgb"
+
+seed: 42
+use_wandb: true
+
+data:
+  dataset_name: "ToyReach2D"
+  num_train_samples: 20000
+  num_val_samples: 2000
+  image_size: [64, 64]
+  use_depth: false
+  max_instruction_len: 64
+  batch_size: 64
+  num_workers: 4
+
+model:
+  d_model: 256
+  n_heads: 4
+  num_layers: 4
+  mlp_dim: 512
+  dropout: 0.1
+  max_image_tokens: 64       # 8x8 patch grid for 64x64 with patch_size=8
+  text_model_name: "t5-small"
+  freeze_text_encoder: true
+  action_dim: 3              # Δx, Δy, Δz
+
+train:
+  num_epochs: 30
+  lr: 2e-4
+  weight_decay: 0.01
+  warmup_steps: 1000
+  max_steps: 30000
+  grad_clip_norm: 1.0
+  log_every: 50
+  val_every: 500
+  save_every: 5000
+  output_dir: "checkpoints/merlin_toy_reach_rgb"
