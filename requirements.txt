@@ -6,3 +6,5 @@ matplotlib
 tqdm
 pyyaml
 wandb
+sentencepiece
+
