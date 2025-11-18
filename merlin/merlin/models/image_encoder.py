@@ -57,7 +57,8 @@ class ImageTokenizer(nn.Module):
         if self.proj is None:
             # lazily initialize projection based on C*ph*pw
             in_dim = feats.size(-1)
-            self.proj = nn.Linear(in_dim, self.d_model)
+            # ensure projection is placed on same device as feats
+            self.proj = nn.Linear(in_dim, self.d_model).to(feats.device)
 
         tokens = self.proj(feats)  # (B, N_patches, d_model)
         return tokens
