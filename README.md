@@ -44,6 +44,7 @@ proprio->[ Proprio MLP ]-------+   |                   |
                                    |                   |
 [learnable readout token] -------->+-------------------+
 
+---
 
 ## Installation
 
