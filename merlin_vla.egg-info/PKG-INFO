@@ -1,3 +1,21 @@
+Metadata-Version: 2.4
+Name: merlin-vla
+Version: 0.1.0
+Summary: Add your description here
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: matplotlib>=3.10.8
+Requires-Dist: numpy>=2.4.2
+Requires-Dist: pyyaml>=6.0.3
+Requires-Dist: sentencepiece>=0.2.1
+Requires-Dist: torch>=2.0.0
+Requires-Dist: torchvision>=0.15.0
+Requires-Dist: tqdm>=4.67.3
+Requires-Dist: transformers>=4.44.0
+Requires-Dist: wandb>=0.24.2
+Dynamic: license-file
+
 # MERLIN: Multimodal Embedding Reasoning for Low-level Imitation and Navigation
 
 MERLIN is a **Vision–Language–Action (VLA)**-style transformer
@@ -43,38 +61,3 @@ text -->[ T5 Encoder + proj ]--+   | Merlin Transformer|--> [readout token] -> A
 proprio->[ Proprio MLP ]-------+   |                   |
                                    |                   |
 [learnable readout token] -------->+-------------------+
-
-
-### Install uv:
-
-`curl -LsSf https://astral.sh/uv/install.sh | sh`
-
-### Verify the installation:
-
-`echo 'export PATH="$HOME/snap/code/221/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc`    
-
-`uv --version`
-
-## Clone the repository or Download as zip file
-
-`git clone https://github.com/yoursrealkiran/merlin_vla.git`
-
-`cd merlin_vla`
-
-## Environment Setup
-
-### Create a Virual Environment
-
-#### In the terminal, run the below command to create a virtual environment
-
-`uv venv`
-
-#### Activate the environment
-
-`source .venv/bin/activate`
-
-#### Install Dependencies
-
-`uv sync`
-
-

@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
-from merlin.models.merlin_model import MerlinPolicy
+from merlin.merlin.models.merlin_model import MerlinPolicy
 from merlin.data.toy_reach_dataset import ToyReach2DDataset
 
 @torch.no_grad()
@@ -23,7 +23,7 @@ def evaluate_checkpoint(ckpt_path: str, num_samples: int = 1000):
         max_image_tokens=model_cfg["max_image_tokens"],
         max_text_tokens=model_cfg["max_text_tokens"],
     ).to(device)
-    model.load_state_dict(ckpt["model"])
+    model.load_state_dict(ckpt["model"], strict=False)
     model.eval()
 
     ds = ToyReach2DDataset(num_samples=num_samples)
