@@ -80,4 +80,8 @@ proprio->[ Proprio MLP ]-------+   |                   |
 
 `uv sync`
 
+#### Running evaluation
+
+`uv run python merlin/eval/eval_reach.py --ckpt checkpoints/merlin_toy_reach_rgb/<your_checkpoint_file>`
+
 
