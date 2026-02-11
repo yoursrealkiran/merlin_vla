@@ -29,24 +29,8 @@ MERLIN is designed to explore:
 
 ---
 
-## 🧱 Architecture
 
-High-level architecture:
-
-```text
-        +-----------------+        +-------------------+
-image ->| ImageTokenizer  |----+   |                   |
-        +-----------------+    |   |                   |
-                               +-->|                   |
-text -->[ T5 Encoder + proj ]--+   | Merlin Transformer|--> [readout token] -> Action MLP
-                               +-->|   Backbone        |
-proprio->[ Proprio MLP ]-------+   |                   |
-                                   |                   |
-[learnable readout token] -------->+-------------------+
-
----
-
-## Installation
+## ⚙️ Installation
 
 ### Install uv:
 
@@ -83,5 +67,3 @@ proprio->[ Proprio MLP ]-------+   |                   |
 #### Running evaluation
 
 `uv run python merlin/eval/eval_reach.py --ckpt checkpoints/merlin_toy_reach_rgb/<your_checkpoint_file>`
-
-
