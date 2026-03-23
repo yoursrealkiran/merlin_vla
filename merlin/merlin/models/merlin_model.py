@@ -58,50 +58,56 @@ class MerlinPolicy(nn.Module):
 
     def forward(self, batch):
         """
-        batch: dict with keys:
-          - 'image': (B, C, H, W) float32
-          - 'instruction': list[str] length B
-          - 'proprio': (B, D)
+        batch['image']: (B, T, C, H, W) - T is the history window (e.g., 3 frames)
+        batch['proprio']: (B, T, D)
+        batch['instruction']: list[str] (B,) - Global instruction doesn't change over T
         """
-        img = batch["image"]       # torch.Tensor
-        proprio = batch["proprio"] # torch.Tensor
+        img_seq = batch["image"]      # (B, T, C, H, W)
+        proprio_seq = batch["proprio"] # (B, T, D)
         texts = batch["instruction"]
 
-        B = img.size(0)
+        B, T, C, H, W = img_seq.shape
 
-        # 1. image tokens
-        img_tokens = self.image_tokenizer(img)  # (B, N_img, d_model)
-        N_img = img_tokens.size(1)
+        # 1. Process Image Sequence
+        # Flatten B and T to process all frames through the CNN stem at once
+        img_flat = img_seq.view(B * T, C, H, W)
+        img_tokens = self.image_tokenizer(img_flat) # (B*T, N_img, d_model)
+        img_tokens = img_tokens.view(B, T * img_tokens.size(1), -1) # (B, T*N_img, d_model)
 
-        # 2. text tokens
-        text_tokens, text_mask = self.text_encoder(texts)  # (B, N_txt, d_model), (B, N_txt)
-        N_txt = text_tokens.size(1)
+        # 2. Process Proprio Sequence
+        proprio_flat = proprio_seq.view(B * T, -1)
+        proprio_tokens = self.proprio_encoder(proprio_flat) # (B*T, 1, d_model)
+        proprio_tokens = proprio_tokens.view(B, T, -1) # (B, T, d_model)
 
-        # 3. proprio token
-        proprio_token = self.proprio_encoder(proprio)  # (B, 1, d_model)
+        # 3. Text tokens (remain global context)
+        text_tokens, text_mask = self.text_encoder(texts)
 
-        # 4. readout token (same for all, but broadcasted)
-        readout = self.readout_token.expand(B, -1, -1)  # (B, 1, d_model)
+        # 4. Readout token
+        readout = self.readout_token.expand(B, -1, -1)
 
-        # token ordering: [readout, proprio, text, image]
-        tokens = torch.cat([readout, proprio_token, text_tokens, img_tokens], dim=1)
-        # build attn mask: 1 = valid, 0 = pad
+        # 5. Concatenate everything
+        # Order: [Readout, Proprio_History, Text, Image_History]
+        tokens = torch.cat([readout, proprio_tokens, text_tokens, img_tokens], dim=1)
+
+        # 6. Mask Generation 
         device = tokens.device
-        img_mask = torch.ones(B, N_img, device=device, dtype=torch.long)
-        proprio_mask = torch.ones(B, 1, device=device, dtype=torch.long)
+        
+        # All extra tokens are valid (1)
         readout_mask = torch.ones(B, 1, device=device, dtype=torch.long)
+        proprio_mask = torch.ones(B, T, device=device, dtype=torch.long)
+        
+        # Calculate total image tokens across the history window
+        N_img_total = img_tokens.size(1) 
+        img_mask = torch.ones(B, N_img_total, device=device, dtype=torch.long)
 
+        # Concatenate masks in the EXACT same order as the tokens
+        # Order: [Readout, Proprio_History, Text, Image_History]
         attn_mask = torch.cat(
             [readout_mask, proprio_mask, text_mask.to(device), img_mask],
             dim=1
-        )  # (B, N_total)
-
-        # 5. transformer backbone
-        encoded = self.backbone(tokens, attn_mask=attn_mask)  # (B, N, d_model)
-
-        # 6. extract readout token (index 0)
-        readout_out = encoded[:, 0, :]  # (B, d_model)
-
-        # 7. action prediction
-        action = self.action_head(readout_out)  # (B, action_dim)
-        return action
+        )  # Final Shape: (B, 1 + T + N_txt + (T*N_img))
+        
+        # 6. Transformer Backbone, generate masks and pass through backbone as before 
+        encoded = self.backbone(tokens, attn_mask=attn_mask)
+        # 7. Action Head
+        return self.action_head(encoded[:, 0, :])
